@@ -6,11 +6,9 @@ import android.media.MediaRecorder;
 
 import com.donald.jerryaudio.log.JerryLog;
 
-public class JavaAudio implements AudioRecorder, Runnable {
+public class JavaAudio extends AudioRecorder implements Runnable {
     private static final String TAG = JavaAudio.class.getSimpleName();
 
-    private int sampleRate;
-    private int channelNum;
     private int recBufSize;
 
     private volatile boolean isCapture;
@@ -21,40 +19,33 @@ public class JavaAudio implements AudioRecorder, Runnable {
 
     private DataListener listener;
 
-    @Override
-    public void setSampleRate(int sampleRate) {
-        this.sampleRate = sampleRate;
+    public JavaAudio(int sampleRate, int channelNumber) {
+        super(sampleRate, channelNumber);
     }
 
-    @Override
-    public void setChannel(int channelNum) {
-        this.channelNum = channelNum;
-    }
-
-    @Override
-    public void setListener(DataListener listener) {
-        this.listener = listener;
+    public JavaAudio(int sampleRate, int channelNumber, DataListener listener) {
+        super(sampleRate, channelNumber, listener);
     }
 
     @Override
     public void init() {
-        if (sampleRate <= 0 || channelNum <= 0) {
-            throw new IllegalArgumentException("Invalid audio parameters");
-        }
+        validateParameters();
         recBufSize = AudioRecord.getMinBufferSize(
-                sampleRate, getChannelFormat(), AudioFormat.ENCODING_PCM_16BIT);
-
+                getSampleRate(),
+                getChannelFormat(),
+                AudioFormat.ENCODING_PCM_16BIT);
         if (recBufSize == AudioRecord.ERROR_BAD_VALUE || recBufSize < 0) {
             throw new IllegalArgumentException("AudioRecord buffer size invalid: " + recBufSize);
         }
         captureBuf = new byte[recBufSize];
 
         JerryLog.d(TAG, "init: sampleRate %d, channelNum %d, recBufSize %d",
-                sampleRate, channelNum, recBufSize);
+                getSampleRate(), getChannelNumber(), recBufSize);
     }
 
     private int getChannelFormat() {
-        return channelNum == 1 ? AudioFormat.CHANNEL_IN_MONO : AudioFormat.CHANNEL_IN_STEREO;
+        return getChannelNumber() == 1 ?
+                AudioFormat.CHANNEL_IN_MONO : AudioFormat.CHANNEL_IN_STEREO;
     }
 
     @Override
@@ -70,8 +61,8 @@ public class JavaAudio implements AudioRecorder, Runnable {
     }
 
     private AudioRecord getAudioRecord() {
-        AudioRecord record = new AudioRecord(MediaRecorder.AudioSource.MIC,
-                sampleRate, getChannelFormat(), AudioFormat.ENCODING_PCM_16BIT, recBufSize);
+        AudioRecord record = new AudioRecord(MediaRecorder.AudioSource.MIC, getSampleRate(),
+                getChannelFormat(), AudioFormat.ENCODING_PCM_16BIT, recBufSize);
 
         if (record.getState() != AudioRecord.STATE_INITIALIZED) {
             JerryLog.e(TAG, "Audio record init failed.");

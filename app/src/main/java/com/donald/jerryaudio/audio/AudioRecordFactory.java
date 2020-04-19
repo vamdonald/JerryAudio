@@ -1,4 +1,7 @@
 package com.donald.jerryaudio.audio;
 
-public class AudioRecordFactory {
+public abstract class AudioRecordFactory {
+
+    public abstract void createAudioRecord();
+
 }

@@ -1,19 +1,53 @@
 package com.donald.jerryaudio.audio;
 
-public interface AudioRecorder {
-    void init();
+public abstract class AudioRecorder {
+    private int sampleRate;
+    private int channelNumber;
+    private DataListener dataListener;
 
-    void start();
+    private AudioRecorder() {
+    }
 
-    void stop();
+    public AudioRecorder(int sampleRate, int channelNumber) {
+        this(sampleRate, channelNumber, null);
+    }
 
-    void release();
+    public AudioRecorder(int sampleRate, int channelNumber, DataListener listener) {
+        this.sampleRate = sampleRate;
+        this.channelNumber = channelNumber;
+        this.dataListener = listener;
+    }
 
-    void setSampleRate(int sampleRate);
+    public abstract void init();
 
-    void setChannel(int channelNum);
+    public abstract void start();
 
-    void setListener(DataListener listener);
+    public abstract void stop();
+
+    public abstract void release();
+
+    public void setListener(DataListener listener) {
+        dataListener = listener;
+    }
+
+    public DataListener getListener() {
+        return dataListener;
+    }
+
+    public int getSampleRate() {
+        return sampleRate;
+    }
+
+    public int getChannelNumber() {
+        return channelNumber;
+    }
+
+    void validateParameters() {
+        if (sampleRate <= 0 || channelNumber <= 0) {
+            throw new IllegalArgumentException("Invalid audio parameters: sample rate "
+                    + sampleRate + ", channel number " + channelNumber);
+        }
+    }
 
     interface DataListener {
         void onAudioAvailable(byte[] data, int sizeInByte);

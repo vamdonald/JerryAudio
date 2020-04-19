@@ -17,9 +17,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        recorder = new JavaAudio();
-        recorder.setChannel(1);
-        recorder.setSampleRate(16000);
+        recorder = new JavaAudio(16000, 1);
         recorder.init();
     }
 
